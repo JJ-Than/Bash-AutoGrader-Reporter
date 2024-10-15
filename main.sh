@@ -17,6 +17,8 @@ function error_input_option_q_v() {
     exit 1003
 }
 
+# --- 1 Verify the input ---
+
 # Parse Input
 verbosity="1"
 while getopts "hqsv" opt; do
@@ -58,3 +60,23 @@ while getopts "hqsv" opt; do
     esac
 done
 
+# Check if required files exist
+if [ ! -f "./Config.json" ]; then
+    echo "Configuration Error: config file could not be found. Please ensure Config.json exists within your present working directory, then run again."
+    exit 2001
+fi
+
+if [ ! -f "./keys.txt" ]; then
+    echo "Configuration Error: the keys file does not exist. Please reinstall this script file and ensure a valid ./keys.txt file is generated."
+    exit 2002
+fi
+
+# Input and test configuration
+CONFIG=$(cat ./Config.json)
+NUMBER_OF_KEYS=""
+Test_Case=$(sed -E '/\s{4}"Properties"[:]\s?\{/,/\s{4}\}/s/"Number_Of_Keys"[:]\s?([0-9]{1,})/\1/p' $CONFIG)
+if [ -z $Test_Case ]; then
+    echo $Test_Case
+else
+    echo "foo"
+fi
