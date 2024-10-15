@@ -1,4 +1,5 @@
-# Bash-AutoGrader-Reporter
+# The Bash Auto-Grader and Reporter Script Collection
+This collection of scripts is written with the intention to collect information about files specified during setup. It will then compare those files against a 'key' file to see if they meet the requirements to pass. Upon meeting the requirements. The script will post to an HTTP endpoint within Microsoft Power Automate to store and report on the grade of a file.
 
 ## Project Feature List
 Below are some anticipated features. If a feature is not checked off, then it is not completed yet.
