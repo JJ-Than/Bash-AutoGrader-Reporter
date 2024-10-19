@@ -8,7 +8,9 @@ Below are some anticipated features. If a feature is not checked off, then it is
 - [ ] File content changes (useful for checking if configuration files contain the correct configuration)
 - [ ] Search for custom values within files (useful for checking logfiles to ensure the correct items are being logged)
 - [ ] Comparison of key files to specified files to validate if an input is correct
-- [ ] Offloading of autograding jobs to an HTTP server, preventing modification
+- [ ] Offloading of autograding jobs to an HTTP server, preventing modification of grading routines
+
+- Other features:
 - [ ] Install and removal scripts
 - [ ] Communication with outside HTTP servers to report on grading success or failure
 - [ ] Storage of key information to uniquely identify each environment with the HTTP server
