@@ -74,7 +74,7 @@ fi
 # Input and test configuration
 CONFIG=$(cat ./Config.json)
 NUMBER_OF_KEYS=""
-Test_Case=$(grep -E '\"Number_Of_Keys\":([0-9]{1,})' $CONFIG)
+Test_Case=$(grep -E '\"Number_Of_Keys\":[0-9]{1,}' $CONFIG)
 if [[ -v $Test_Case ]]; then
     cat $CONFIG | jq -r '.Properties.Number_Of_Keys'
 else
