@@ -1,9 +1,9 @@
 #! /bin/bash
 
 NUMBER_OF_KEYS=""
-Test_Case=$(sed -E 's/["]Number_Of_Keys[":]{2}\s?([0-9]{1,})/\1/p' ./Config.json)
-if [ -z $Test_Case ]; then
-    echo $Test_Case
+Test_Case=$(grep -E '\"Number_Of_Keys\":([0-9]{1,})' ./Config.json)
+if [[ -v Test_Case ]]; then
+    cat ./Config.json | jq -r '.Properties.Number_Of_Keys'
 else
     echo "foo"
 fi
