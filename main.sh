@@ -17,7 +17,7 @@ function error_input_option_q_v() {
     exit 1003
 }
 
-# --- 1 Verify the input ---
+# --- 1. Verify the input ---
 
 # Parse Input
 verbosity="1"
@@ -80,3 +80,17 @@ if [[ -v $Test_Case ]]; then
 else
     echo "foo"
 fi
+
+
+# --- 2. Call one or more grading scripts ---
+
+
+
+
+# --- 3. Calculate grade based on rubric ---
+
+
+
+
+# --- 4. Send results to HTTP Server after-action-actions ---
+

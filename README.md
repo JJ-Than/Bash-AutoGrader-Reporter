@@ -4,13 +4,13 @@ This collection of scripts is written with the intention to collect information 
 ## Project Feature List
 Below are some anticipated features. If a feature is not checked off, then it is not completed yet.
 
-- Configuration of how to grade files. Options are:
-- [ ] File content changes (useful for checking if configuration files contain the correct configuration)
-- [ ] Search for custom values within files (useful for checking logfiles to ensure the correct items are being logged)
-- [ ] Comparison of key files to specified files to validate if an input is correct (useful to check if two files have matching content)
-- [ ] Offloading of autograding jobs to an HTTP server, preventing modification of grading routines
+### Configuration of how to grade files. Options are ...
+- [ ] Key/Value Parsing: File content changes (useful for checking if configuration files contain the correct configuration)
+- [ ] Line Parsing: Search for custom line attributes within files (useful for checking logfiles to ensure the correct items are being logged)
+- [ ] Hash Verification: Comparison of key file to specified file(s) to validate if an input is correct (useful to check if two files have matching content)
+- [ ] NMP (Not My Problem) Parsing: Offloading of autograding jobs to an HTTP server, preventing modification of grading routines
 
-- Other features:
+### Other features
 - [ ] Install and removal scripts
 - [ ] Communication with outside HTTP servers to report on grading success or failure
 - [ ] Storage of key information to uniquely identify each environment with the HTTP server
