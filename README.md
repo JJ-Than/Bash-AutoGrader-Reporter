@@ -7,7 +7,7 @@ Below are some anticipated features. If a feature is not checked off, then it is
 - Configuration of how to grade files. Options are:
 - [ ] File content changes (useful for checking if configuration files contain the correct configuration)
 - [ ] Search for custom values within files (useful for checking logfiles to ensure the correct items are being logged)
-- [ ] Comparison of key files to specified files to validate if an input is correct
+- [ ] Comparison of key files to specified files to validate if an input is correct (useful to check if two files have matching content)
 - [ ] Offloading of autograding jobs to an HTTP server, preventing modification of grading routines
 
 - Other features:
