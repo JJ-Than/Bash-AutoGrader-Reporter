@@ -2,6 +2,10 @@
     "version":0.1,
     "type":"Document",
     "Properties": {
-        "Number_Of_Keys":1
+        "Number_Of_Keys":4,
+        "KeyTypes": [
+            "key", "line", "hash", "nmp"
+        ]
+            
     }
 }
