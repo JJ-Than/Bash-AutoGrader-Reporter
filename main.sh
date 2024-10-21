@@ -84,45 +84,48 @@ fi
 KEY_TYPES=$(echo $CONFIG | jq -r '.Properties.Key_Types' > /dev/null) # Get key number to key type correlation
 
 # --- 2. Call one or more grading scripts ---
-function compare_hashes() {
-    ALGORITHM=$1; HASH=$2; SALT=$3; COMPARISONCLEARTEXT=$4
+#function compare_hashes() {
+#    ALGORITHM=$1; HASH=$2; SALT=$3; COMPARISONCLEARTEXT=$4
 
-    if $3; then   # If salt was input
-        key="$COMPARISONCLEARTEXT$SALT"
-    else
-        key=$COMPARISONCLEARTEXT
-    fi
+#    if $3; then   # If salt was input
+#        key="$COMPARISONCLEARTEXT$SALT"
+#    else
+#        key=$COMPARISONCLEARTEXT
+#    fi
 
-    hash_resultant=$(echo $key | $ALGORITHM | awk '{print $1}')
+#    hash_resultant=$(echo $key | $ALGORITHM | awk '{print $1}')
 
-    if [[ $HASH == $hash_resultant ]]; then
-        return 0    # hashes match
-    else
-        return 1    # hashes don't match
-    fi
-}
+#    if [[ $HASH == $hash_resultant ]]; then
+#        return 0    # hashes match
+#    else
+#        return 1    # hashes don't match
+#    fi
+#}
 
 # if decryption key not in library, import decryption key
-if [[ ! -v $(gpg --list-public-keys | grep `cat ./Crypto/decrypt.key.pub.fingerprint`) ]]; then 
-    gpg --import `cat ./Crypto/decrypt.key.pub`
-fi
+#if [[ ! -v $(gpg --list-public-keys | grep `cat ./Crypto/decrypt.key.pub.fingerprint`) ]]; then 
+#    gpg --import `cat ./Crypto/decrypt.key.pub`
+#fi
 
 # setting up comparison variables
-CRYPTO_HASHES=$(gpg --decrypt ./Crypto/comparison-scripts-hashes.json.gpg)
-KEYHASH=$(echo $CRYPTO_HASHES | jq -r '.key.key_hash')
-KEYFPHASH=$(echo $CRYPTO_HASHES | jq -r '.key.key_fingerprint_hash')
-SCRIPT_SALT=$(echo $CRYPTO_HASHES | jq -r '.salt')
-SCRIPT_NAMES=('hash.sh', 'key.sh', 'line.sh', 'not-my-problem.sh')
-ALGORITHM=(echo $CRYPTO_HASHES | jq -r '.hash_program')
+#CRYPTO_HASHES=$(gpg --decrypt ./Crypto/comparison-scripts-hashes.json.gpg)
+#SCRIPT_SALT=$(echo $CRYPTO_HASHES | jq -r '.salt')
+#SCRIPT_NAMES=('hash.sh', 'key.sh', 'line.sh', 'not-my-problem.sh')
+#ALGORITHM=(echo $CRYPTO_HASHES | jq -r '.hash_program')
 
 # verify bash scripts are unaltered
+#for script_name in $SCRIPT_NAMES; do
+#    cleartext_file=$(cat ./Crypto/$script_name)
+#    curr_hash=$(echo $CRYPTO_HASHES | jq -r .Files.$script_name)
 
-if $?; then
+#    compare_hashes $ALGORITHM $curr_hash $SCRIPT_SALT $cleartext_file
+#    if $?; then
+#        echo "File Integrity Error: the script $script_name failed it's integrity check. Stopping!"
+#        exit 3001
+#    fi
+#done
 
-fi
-for script_name in $SCRIPT_NAMES; do
 
-done
 
 # --- 3. Calculate grade based on rubric ---
 
