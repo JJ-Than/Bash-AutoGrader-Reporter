@@ -1,0 +1,16 @@
+{
+    "version":0.1,
+    "name":"Comparison script hashes",
+    "hash-program":"sha256sum",
+    "salt":"1",
+    "Files": {
+        "hash.sh":"ad10c20ef034741e60f24687f3eb5c2cd93e0a26182c0e4471133c36a9095c90",
+        "key.sh":"462662b724521d1acd1cf9e958d90cf108467e6cd114ba4154372810dbbaec2f",
+        "line.sh":"eaf53a7a903b80b45b7a1fd353d2abf245dcba9288cb26d0a785186f93109a76",
+        "not-my-problem.sh":"91617e5ef37194c23046338e618d8aa158f52a498f046235fe2240973b23c9dc"
+    },
+    "key": {
+        "key_hash": "0079c256719bc751d620f5ae98ee1c969a44c29b77c7ad48dc03cf3235e493a5",
+        "key_fingerprint_hash": "0079c256719bc751d620f5ae98ee1c969a44c29b77c7ad48dc03cf3235e493a5"
+    }
+}

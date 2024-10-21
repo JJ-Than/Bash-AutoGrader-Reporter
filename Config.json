@@ -3,9 +3,8 @@
     "type":"Document",
     "Properties": {
         "Number_Of_Keys":4,
-        "KeyTypes": [
+        "Key_Types": [
             "key", "line", "hash", "nmp"
         ]
-            
     }
 }
