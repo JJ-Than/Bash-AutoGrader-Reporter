@@ -84,6 +84,7 @@ fi
 KEY_TYPES=$(echo $CONFIG | jq -r '.Properties.Key_Types' > /dev/null) # Get key number to key type correlation
 
 # --- 2. Call one or more grading scripts ---
+
 #function compare_hashes() {
 #    ALGORITHM=$1; HASH=$2; SALT=$3; COMPARISONCLEARTEXT=$4
 
@@ -125,7 +126,16 @@ KEY_TYPES=$(echo $CONFIG | jq -r '.Properties.Key_Types' > /dev/null) # Get key 
 #    fi
 #done
 
+counter=1
+for type in $KEY_TYPES; do
+    beginline='^Start Key $counter$'
+    endline='^End Key $counter$'
+    sedline='/^$beginline\$/,/^$endline\$/p'
 
+    key=$(sed -E $sedline ./keys.txt)
+    
+    bash ./Comparison-Scripts/$type 
+done
 
 # --- 3. Calculate grade based on rubric ---
 
