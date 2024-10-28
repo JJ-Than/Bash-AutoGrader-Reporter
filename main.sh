@@ -55,7 +55,7 @@ while getopts "fFgGhqsv" opt; do
         if [ $suppress_http = 1 ]; then
             error_input_option_g_s
         fi
-        if [[ ! $suppress_local_grading = 2 ]]; then
+        if [[ ! $suppress_local_grading == 2 ]]; then
             suppress_local_grading=1
         fi
         ;;
