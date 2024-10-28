@@ -3,14 +3,19 @@
 # --- 1. Verify the input ---
 
 function display_usage() {
-    echo "Usage: $0 -[fFsv]"
-    echo "       $0 -[fFqs]"
+    echo "Usage: $0 -[f|F sv]"
+    echo "       $0 -[f|F qs]"
+    echo "       $0 -[f|F g|G v]"
+    echo "       $0 -[f|F g|G q]"
     echo "Options:"
     echo "  -f: Force continuation of script upon warning(s)"
-    echo "  -F: Force continuation of script upon warnings and silences warning(s) (same as -F -q)"
+    echo "  -F: Force continuation of script upon warnings and silences warning(s) (same as -f -q)"
+    echo "  -g: skips local Grading step, relying on HTTP Endpoint to calculate the grade"
+    echo "  -G: skips local Grading step, relying on HTTP Endpoint to calculate the grade, ignoring 'nmp' warning(s) (not implemented)"
     echo "  -h: displays this Help page"
     echo "  -q: silences (Quiet) output"
     echo "  -s: Skips reporting to HTTP Endpoint"
+    echo "  -s: Skips reporting to HTTP Endpoint, ignoring 'nmp' warning(s) (not implemented)"
     echo "  -v: increases Verbosity of output"
     echo "      if -F is defined, replaces with -f"
 }
@@ -22,11 +27,19 @@ function error_input_option_q_v() {
     exit 1003
 }
 
+function error_input_option_g_s() {
+    echo "Input Validation Error: Options -g and -s cannot be used at the same time."
+    echo ""
+    display_usage
+    exit 1004
+}
+
 # Parse Input
 verbosity=1
 suppress_http=0
+suppress_local_grading=0
 force=0
-while getopts "fFhqsv" opt; do
+while getopts "fFgGhqsv" opt; do
     case $opt in
         f)
         if [[ ! $force == 2 ]]; then
@@ -36,6 +49,22 @@ while getopts "fFhqsv" opt; do
 
         F)
         force=2
+        ;;
+
+        g)
+        if [ $suppress_http = 1 ]; then
+            error_input_option_g_s
+        fi
+        if [[ ! $suppress_local_grading = 2 ]]; then
+            suppress_local_grading=1
+        fi
+        ;;
+
+        G)
+        if [ $suppress_http = 1 ]; then
+            error_input_option_g_s
+        fi
+        suppress_local_grading=2
         ;;
 
         h)
@@ -51,7 +80,14 @@ while getopts "fFhqsv" opt; do
         ;;
 
         s)
+        if $suppress_local_grading; then
+            error_input_option_g_s
+        fi
         suppress_http=1
+        ;;
+
+        S)
+
         ;;
 
         v)
@@ -75,9 +111,13 @@ while getopts "fFhqsv" opt; do
     esac
 done
 
-if [[ $force == 1 && $verbosity == 0 ]]; then force=2
+if [[ $verbosity == 2 ]]; then echo "----- (1) Validating Input ------------------"; fi
+
+# Guarantee Verbosity Presedence
+if [[ $force == 1 && $verbosity == 0 ]]; then 
+    force=2
 elif [[ $force == 2 && $verbosity == 2 ]]; then
-    echo "Warning: Ignoring -F and applying -f. Verbosity takes precedence over force options"
+    echo "Warning: Ignoring -F and applying -f. Verbosity takes precedence over force options."
     force=1
 fi
 
@@ -96,14 +136,88 @@ fi
 CONFIG='./Config.json'
 NUMBER_OF_KEYS=""
 if [[ ! -z $(grep -E '\"Number_Of_Keys\":[0-9]{1,}' $CONFIG) ]]; then
-    cat $CONFIG | jq -r '.Properties.Number_Of_Keys'
+    NUMBER_OF_KEYS=$(cat $CONFIG | jq -r '.Properties.Number_Of_Keys')
 fi
 
 # Get key number to key type correlation
 KEY_TYPES_JSON=$(cat $CONFIG | jq -r '.Properties.Key_Types') 
 noquote=$(echo $KEY_TYPES_JSON | tr -d \"\,[])
 KEY_TYPES=($noquote)
+noquote=""
 
+# Get rubric information
+RUBRIC_WEIGHTS_JSON=$(cat $CONFIG | jq -r '.Rubric.Weights') 
+noquote=$(echo $RUBRIC_WEIGHTS_JSON | tr -d \"\,[])
+RUBRIC_WEIGHTS=($noquote)
+noquote=""
+
+PASSING_SCORE=$(cat $CONFIG | jq -r '.Rubric.Passing_Score')
+
+if [[ ! $? && $suppress_http ]]; then
+    case $force in
+        0)
+        echo "Configuration Error: Rubric passing score couldn't be found or extracted from $CONFIG. Cannot utilize rubric for grading."
+        echo "                     Continuing will not report grades locally, but solely rely on the http server rubric, disabling -s."
+        read -p "                      Do you wish to continue? (Y/n) " REPLY
+        if [[ $REPLY == "y" || $REPLY == "Y" ]]; then
+            echo "Continuing exectuion..."
+            suppress_http=0
+            suppress_local_grading=1
+        else
+            echo "exiting..."
+            exit 2005
+        fi
+        ;;
+
+        1|2)
+        echo "Configuration Error: Rubric weight value count does not line up with key count. Cannot produce accurate grade. Exiting..."
+        exit 2005
+        ;;
+
+        *)
+        echo 'Internal Error: $force variable out of scope. Exiting...'
+        exit 3031
+        ;;
+    esac
+elif [[ ! $? && $suppress_local_grading == 0 && $verbosity ]]; then
+    echo "Configuration Error: Rubric passing score couldn't be found or extracted from $CONFIG. Cannot utilize rubric for grading."
+    echo "                     Falling back on HTTP server rubric for grading. Grade will not be calculated locally. enabling -g."
+    suppress_local_grading=1
+elif [[ ! $? && $suppress_local_grading == 0 && $verbosity == 0 ]]; then
+    suppress_local_grading=1
+elif [[ ${#RUBRIC_WEIGHTS[@]} != $NUMBER_OF_KEYS && $suppress_http ]]; then
+    case $force in
+        0)
+        echo "Configuration Error: Rubric weight value count does not line up with key count. Cannot utilize rubric for grading."
+        echo "                     Continuing will not report grades locally, but solely rely on the http server rubric, disabling -s."
+        read -p "                      Do you wish to continue? (Y/n) " REPLY
+        if [[ $REPLY == "y" || $REPLY == "Y" ]]; then
+            echo "Continuing exectuion..."
+            suppress_http=0
+            suppress_local_grading=1
+        else
+            echo "exiting..."
+            exit 2004
+        fi
+        ;;
+
+        1|2)
+        echo "Configuration Error: Rubric weight value count does not line up with key count. Cannot produce accurate grade. Exiting..."
+        exit 2004
+        ;;
+
+        *)
+        echo 'Internal Error: $force variable out of scope. Exiting...'
+        exit 3031
+        ;;
+    esac
+elif [[ ${#RUBRIC_WEIGHTS[@]} != $NUMBER_OF_KEYS && $suppress_local_grading == 0 && $verbosity ]]; then
+    echo "Configuration Error: Rubric weight value count does not line up with key count. Cannot utilize rubric for grading."
+    echo "                     Falling back on HTTP server rubric for grading. Grade will not be calculated locally. enabling -g."
+    suppress_local_grading=1
+elif [[ ${#RUBRIC_WEIGHTS[@]} != $NUMBER_OF_KEYS && $suppress_local_grading == 0 && $verbosity == 0 ]]; then
+    suppress_local_grading=1
+fi
 
 # --- 2. Call one or more grading scripts ---
 
@@ -148,9 +262,12 @@ KEY_TYPES=($noquote)
 #    fi
 #done
 
+if [[ $verbosity == 2 ]]; then echo "----- (2) Calling Grading Scripts ----------"; fi
+
 counter=1
+icounter=0
 analysis_file_paths=''
-nmp_present=0
+pass_fail_list='' # nmp present if value is '2'
 
 if [[ $verbosity == 1 ]]; then echo "----- output ----"; fi
 
@@ -216,6 +333,9 @@ for type in ${KEY_TYPES[@]}; do
             bash "./Comparison-Scripts/$type.sh" "$key" $analysis_file_path >> /dev/null
         fi
 
+        pass_fail_list[$icounter]=$?
+        #echo "Test $counter: "${pass_fail_list[$icounter]}
+
     elif [[ $type == 'nmp' && $verbosity == 2 ]]; then
         echo ""
         echo "----- input -----"
@@ -226,17 +346,82 @@ for type in ${KEY_TYPES[@]}; do
         echo "----- output ----"
         echo "not graded locally - nmp"
 
+        pass_fail_list[$icounter]=2
+
     elif [[ $type == 'nmp' && $verbosity == 1 ]]; then
         echo "not graded locally - nmp"
+
+        pass_fail_list[$icounter]=2
+    
+    elif [[ $type == 'nmp' ]]; then
+        pass_fail_list[$icounter]=2
     fi
 
     analysis_file_paths+=$analysis_file_path
     
+    icounter=$counter
     ((counter=$counter+1))
 done
 
 # --- 3. Calculate grade based on rubric ---
+if [ $suppress_local_grading ]; then
+    if [[ $verbosity == 2 ]]; then echo "----- (3) Calculating Grade ---------------"; fi
 
+    accurate_grade=1
+    score=0
+    possible_score=0
+    counter=0
+
+    for pfscore in ${pass_fail_list[@]}; do
+        if [[ $pfscore == 2 && $accurate_grade && $verbosity ]]; then
+            accurate_grade=0
+            echo "Warning: some items on the rubric are configured for remote grading. Local grade will not be accurate."
+        elif [[ $pfscore == 2 && $accurate_grade == 1 && $verbosity == 0 ]]; then
+            accurate_grade=0
+        fi
+
+        if [[ $pfscore == 2 ]]; then   # not calculated locally
+            ((possible_score=$possible_score+${RUBRIC_WEIGHTS[$counter]}))
+            if [[ $verbosity == 2 ]]; then echo "test $counter: Grade not calculated"; fi
+        elif [[ $pfscore == 0 ]]; then # calculated locally (pass)
+            ((score=$score+${RUBRIC_WEIGHTS[$counter]}))
+            ((possible_score=$possible_score+${RUBRIC_WEIGHTS[$counter]}))
+            if [[ $verbosity == 2 ]]; then echo "test $counter: Passed"; fi
+        elif [[ $pfscore == 1 && $verbosity == 2 ]]; then
+            echo "test $counter: Failed"
+        fi
+
+        ((counter=$counter+1))
+
+    done
+
+    if [[ $accurate_grade == 1 && $PASSING_SCORE -le $score && $verbosity ]]; then
+        echo "Score: PASS"
+        echo "Passing Score: $PASSING_SCORE"
+        echo "Score Achieved: $score"
+    elif [[ $PASSING_SCORE -le $score && $verbosity ]]; then
+        echo "Score: PASS"
+        echo "Passing Score: $PASSING_SCORE"
+        echo "Score Range Achieved: $score (verified) - $possible_score (possible)"
+    elif [[ $PASSING_SCORE -le $possible_score && $verbosity ]]; then
+        echo "Score: PASS OR FAIL"
+        echo "Passing Score: $PASSING_SCORE"
+        echo "Score Range Achieved: $score (verified) - $possible_score (possible)"
+        echo "NOTE: Depending on HTTP Server grading, you may or may not have passed."
+    elif [[ $PASSING_SCORE -le $score ]]; then
+        echo "Score: PASS"
+    elif [[ $PASSING_SCORE -le $possible_score ]]; then
+        echo "Score: PASS OR FAIL"
+        echo "NOTE: Depending on HTTP Server grading, you may or may not have passed."
+    elif [ $verbosity ]; then
+        echo "Score: PASS OR FAIL"
+        echo "Passing Score: $PASSING_SCORE"
+        echo "Score Range Achieved: $score (verified) - $possible_score (possible)"
+    else
+        echo "Score: FAIL"
+    fi
+
+fi
 
 
 
