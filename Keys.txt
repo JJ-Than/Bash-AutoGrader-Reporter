@@ -1,15 +1,33 @@
+Start Key Dir 1
+/etc/hosts
+End Key Dir 1
+
 Start Key 1
-123.123.123.123 foo-fighter
+127.0.0.1
 End Key 1
 
+Start Key Dir 2
+/etc/hosts
+End Key Dir 2
+
 Start Key 2
-123.123.123.123 foo-fighter
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 End Key 2
 
+Start Key Dir 3
+/etc/hosts
+End Key Dir 3
+
 Start Key 3
-123.123.123.123 foo-fighter
+498f494232085ec83303a2bc6f04bea840c2b210fbbeda31a46a6e5674d4fc0e
 End Key 3
 
-Start Key 4
-123.123.123.123 foo-fighter
-End Key 4
+Start Key 3 Hint
+Expected contents of the /etc/hosts file are as follows:
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+End Key 3 Hint
+
+Start Key Dir 4
+/etc/hosts
+End Key Dir 4

@@ -15,7 +15,7 @@ function display_usage() {
 }
 
 function error_input_option_c_p() {
-    echo "Input Validation Error: Options -q and -v cannot be used at the same time."
+    echo "Input Validation Error: Options -c and -p cannot be used at the same time."
     echo ""
     display_usage
     exit 9003
@@ -100,8 +100,6 @@ done
 
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-else 
-
 fi
 
 if [[ $DISTRO == "Ubuntu" && $method == "p" ]]; then        # Case Ubuntu

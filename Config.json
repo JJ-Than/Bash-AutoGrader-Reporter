@@ -1,10 +1,19 @@
 {
     "version":0.1,
     "type":"Document",
+    "hash_program":"sha256sum",
+    "http_endpoint":"",
+    "instance_id":"",
     "Properties": {
         "Number_Of_Keys":4,
         "Key_Types": [
             "key", "line", "hash", "nmp"
+        ]
+    },
+    "Rubric": {
+        "Passing_Score":3,
+        "Weights": [
+            1, 1, 1, 1
         ]
     }
 }
